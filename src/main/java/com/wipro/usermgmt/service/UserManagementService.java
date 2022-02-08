@@ -15,4 +15,8 @@ public interface UserManagementService {
 
 	boolean deleteUser(Long id);
 
+	Boolean verifyActivationToken(String code, Long id);
+
+	User getExistanceUser(String field, String value);
+
 }

@@ -12,12 +12,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.wipro.usermgmt.entities.Role;
 import com.wipro.usermgmt.entities.User;
-import com.wipro.usermgmt.service.MiscellaneousOperations;
 import com.wipro.usermgmt.service.UserManagementService;
 
 /**
@@ -33,16 +32,9 @@ public class UserManagementController {
 
 	private UserManagementService usrMgmtService;
 
-	private MiscellaneousOperations miscOperations;
-
 	@Autowired
 	public void setUsrMgmtService(UserManagementService usrMgmtService) {
 		this.usrMgmtService = usrMgmtService;
-	}
-
-	@Autowired
-	public void setMiscOperations(MiscellaneousOperations miscOperations) {
-		this.miscOperations = miscOperations;
 	}
 
 	/**
@@ -101,47 +93,6 @@ public class UserManagementController {
 	}
 
 	/**
-	 * Description: getuser by id
-	 * 
-	 * @param id
-	 * @return
-	 */
-	@GetMapping("/getuser")
-	public ResponseEntity<User> getUserById(@RequestParam Long id) {
-		Log.info("getUserById API invoked for id : {} ", id);
-		User user = miscOperations.getUserById(id);
-		Log.info("end of getUserById API for id : {} ", id);
-		return new ResponseEntity<User>(user, HttpStatus.OK);
-	}
-
-	/**
-	 * Description : getAllRoles
-	 * 
-	 * @return
-	 */
-	@GetMapping("/getroles")
-	public ResponseEntity<List<Role>> getAllRoles() {
-		Log.info("getAllRoles API invoked.");
-		List<Role> roles = miscOperations.getAllRoles();
-		Log.info("end of getUserById API.");
-		return new ResponseEntity<List<Role>>(roles, HttpStatus.OK);
-	}
-
-	/**
-	 * Description: getRole by id
-	 * 
-	 * @param id
-	 * @return
-	 */
-	@GetMapping("/getrole")
-	public ResponseEntity<Role> getRoleById(@RequestParam Long id) {
-		Log.info("getRoleById API invoked for id : {} ", id);
-		Role role = miscOperations.getRoleById(id);
-		Log.info("end of getRoleById API for id : {} ", id);
-		return new ResponseEntity<Role>(role, HttpStatus.OK);
-	}
-
-	/**
 	 * Description: API used to verify the activation link
 	 * 
 	 * @param id
@@ -150,23 +101,23 @@ public class UserManagementController {
 	@GetMapping("/verifyactivation")
 	public ResponseEntity<Boolean> verifyActivationToken(@RequestParam String code, @RequestParam Long id) {
 		Log.info("verifyActivationToken API invoked for id : {}, code : {} ", id, code);
-		Boolean isActivated = miscOperations.verifyActivationToken(code, id);
+		Boolean isActivated = usrMgmtService.verifyActivationToken(code, id);
 		Log.info("end of verifyActivationToken API for id : {}, code : {} ", id, code);
 		return new ResponseEntity<Boolean>(isActivated, HttpStatus.OK);
 	}
 	
 	/**
-	 * Description: getuser by userName
+	 * Description: used to getExistanceUser
 	 * 
 	 * @param id
 	 * @return
 	 */
-	@GetMapping("/getuserByName")
-	public ResponseEntity<User> getUserByName(@RequestParam String userName) {
-		Log.info("getUserById API invoked for userName : {} ", userName);
-		User user = miscOperations.getUserByName(userName);
-		Log.info("end of getUserById API for userName : {} ", userName);
-		return new ResponseEntity<User>(user, HttpStatus.OK);
+	@GetMapping("/getExistanceUser")
+	public ResponseEntity<User> getExistanceUser(@RequestParam String field, @RequestParam String value) {
+		Log.info("getExistanceUser API invoked for field : {}, value: {} ", field, value);
+		User existUser = usrMgmtService.getExistanceUser(field,value);
+		Log.info("getExistanceUser API invoked for field : {}, value: {} ", field, value);
+		return new ResponseEntity<User>(existUser, HttpStatus.OK);
 	}
 
 }

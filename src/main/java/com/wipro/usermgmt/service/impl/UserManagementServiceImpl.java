@@ -1,6 +1,7 @@
 package com.wipro.usermgmt.service.impl;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -9,32 +10,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
-import com.wipro.usermgmt.entities.Role;
 import com.wipro.usermgmt.entities.User;
 import com.wipro.usermgmt.exceptions.UserMgmtException;
-import com.wipro.usermgmt.repository.RoleRepository;
 import com.wipro.usermgmt.repository.UserRepository;
-import com.wipro.usermgmt.service.MiscellaneousOperations;
 import com.wipro.usermgmt.service.UserManagementService;
 
 @Service
-public class UserManagementServiceImpl implements UserManagementService, MiscellaneousOperations {
+public class UserManagementServiceImpl implements UserManagementService {
 
 	private static final Logger Log = LoggerFactory.getLogger(UserManagementServiceImpl.class);
 
 	private UserRepository userRepository;
-
-	private RoleRepository roleRepository;
 
 	@Autowired
 	public void setUserRepository(UserRepository userRepository) {
 		this.userRepository = userRepository;
 	}
 
-	@Autowired
-	public void setRoleRepository(RoleRepository roleRepository) {
-		this.roleRepository = roleRepository;
-	}
 
 	/**
 	 * Description: function used to get users from db
@@ -105,58 +97,6 @@ public class UserManagementServiceImpl implements UserManagementService, Miscell
 	}
 
 	/**
-	 * Description: to get user by id
-	 */
-	@Override
-	public User getUserById(Long id) {
-		Log.info("getUserById method invoked for userid : {} ", id);
-		User user = null;
-		try {
-			Optional<User> optionalUser =  userRepository.findById(id);
-			if (optionalUser.isPresent()) {
-				user = optionalUser.get();
-			} else {
-				throw new UserMgmtException("user does not exist in the system. please register the user.");
-			}
-		} catch (EmptyResultDataAccessException e) {
-			throw new UserMgmtException("requested user id does not exist in the system");
-		}
-		Log.info("end of getUserById method for userid : {} ", id);
-		return user;
-	}
-
-	/**
-	 * Description: Service to get all roles present in the system
-	 */
-	@Override
-	public List<Role> getAllRoles() {
-		Log.info("getAllRoles method invoked.");
-		List<Role> roles = roleRepository.findAll();
-		Log.info("end of getAllRoles method.");
-		return roles;
-	}
-
-	
-	/**
-	 * Description: to get role by id
-	 */
-	@Override
-	public Role getRoleById(Long id) {
-		Log.info("getRoleById method invoked for role {}.", id);
-		Role role = null;
-		Optional<Role> optionalRole = roleRepository.findById(id);
-		if (optionalRole.isPresent()) {
-			Log.info("existing role is present for the role: {}", optionalRole.get().getName());
-			role = optionalRole.get();
-		} else {
-			throw new UserMgmtException("role does not exist in the system. please register the respective role.");
-		}
-		Log.info("end of getRoleById method for role {}.", id);
-		return role;
-	}
-
-	
-	/**
 	 * Description: used to verify activtion link
 	 */
 	@Override
@@ -181,19 +121,33 @@ public class UserManagementServiceImpl implements UserManagementService, Miscell
 	}
 
 	/**
-	 * Description: to get user by userName
+	 * Description: to get existance User
 	 */
 	@Override
-	public User getUserByName(String name) {
-		Log.info("getUserByName method invoked for getUserByName : {} ", name);
-		User user = null;
-		try {
-			user =  userRepository.findByUserName(name);
-		} catch (EmptyResultDataAccessException e) {
-			throw new UserMgmtException("requested user id does not exist in the system");
+	public User getExistanceUser(String field, String value) {
+		Log.info("getExistanceUser method invoked for field : {}, value: {} ", field, value);
+		User existUser = null;
+		if (Objects.nonNull(value)) {
+			try {
+				if (field.equalsIgnoreCase("email")) {
+					existUser = userRepository.findByEmail(value);
+				} else if (field.equalsIgnoreCase("username")) {
+					existUser = userRepository.findByUserName(value);
+				} else if (field.equalsIgnoreCase("id") || !(value.isEmpty())) {
+					Long id = Long.parseLong(value);
+					Optional<User> user = userRepository.findById(id);
+					if (user.isPresent()) {
+						existUser = user.get();
+					}
+				}
+			} catch (EmptyResultDataAccessException e) {
+				throw new UserMgmtException("requested user id does not exist in the system");
+			}
 		}
-		Log.info("end of getUserByName method for getUserByName : {} ", name);
-		return user;
+
+		Log.info("getExistanceUser method invoked for field : {}, value: {} ", field, value);
+
+		return existUser;
 	}
 
 }
